@@ -1,2 +1,1 @@
-export * from "./models/ViewJSONModel";
-
+export {}
