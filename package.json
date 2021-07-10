@@ -1,0 +1,41 @@
+{
+    "name": "cloudui5",
+    "version": "1.0.0",
+    "description": "Libraries for SAPUI5/OpenUI5 that helps in cloud (non-SAP FIORI, non SAP Web IDE) development",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "gulp && tsc",
+        "prepare": "npm run build",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "tapsiturbi",
+    "license": "ISC",
+    "devDependencies": {
+        "@babel/cli": "^7.2.3",
+        "@babel/core": "^7.3.4",
+        "@babel/plugin-proposal-class-properties": "^7.3.4",
+        "@babel/plugin-transform-arrow-functions": "^7.2.0",
+        "@babel/plugin-transform-flow-strip-types": "^7.3.4",
+        "@babel/plugin-transform-template-literals": "^7.7.4",
+        "@babel/preset-env": "^7.4.5",
+        "@babel/preset-typescript": "^7.3.3",
+        "@types/jquery": "^3.3.29",
+        "babel-plugin-transform-modules-ui5": "^7.0.0-rc.8",
+        "babel-plugin-transform-remove-strict-mode": "0.0.2",
+        "babel-preset-transform-ui5": "^7.0.0-rc.8",
+        "babel-preset-ui5": "^6.1.0",
+        "gulp": "^4.0.2",
+        "gulp-babel": "^8.0.0",
+        "gulp-debug": "^3.0.0",
+        "gulp-sourcemaps": "^2.6.5",
+        "gulp-typescript": "^6.0.0-alpha.1",
+        "typescript": "^2.9.2",
+        "ui5ts": "^0.3.2"
+    },
+    "dependencies": {}
+}
