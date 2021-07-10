@@ -9,7 +9,7 @@ export interface ViewJSONModelData {
 /**
  * Base class to use as JSONModel.
  *
- * @name spinifex.webdemo.models.ViewJSONModel
+ * @name cloudui5.models.ViewJSONModel
  */
 export default abstract class ViewJSONModel<T extends ViewJSONModelData> extends JSONModel {
     constructor(oInitData: T ) {

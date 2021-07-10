@@ -2,14 +2,13 @@ const gulp = require('gulp');
 const debug = require('gulp-debug');
 const babel = require("gulp-babel");
 const sourcemaps = require('gulp-sourcemaps');
-
-// const ts = require("typescript");
-const ts = require("gulp-typescript");
-// const rename = require("gulp-rename");
+const ui5preload = require('gulp-ui5-preload');
+const uglify = require('gulp-uglify');
 
 var bToMinify = false;
 // var bGulpV4 = gulp.series ? true : false;
 
+const NAMESPACE = "cloudui5";
 const DIST_PATH = "dist/";
 const SRC_PATH = "src/";
 
@@ -20,46 +19,37 @@ const SRC_PATH = "src/";
 function compileAllTS() {
     var sFinalDest = `${DIST_PATH}`;
 
-    return function() {
+    return function () {
 
         var stream = gulp.src([
             `${SRC_PATH}**/*.ts`,
             `!${SRC_PATH}**/*.d.ts`,
         ]);
 
-        // only get files that have changed
-        // if ( !bToMinify ) {
-        //     stream = stream.pipe(changed(sFinalDest, {extension: ".js"}))
-        //         .pipe(debug({ title: "TS file [changed]" }));
-        // }
-
-        // include sourcemaps only if not minifying
-        // if ( !bToMinify ) {
-            stream = stream.pipe(sourcemaps.init())
-                .pipe(debug({ title: "TS file with sourcemaps" }));
-        // }
+        stream = stream.pipe(sourcemaps.init())
+            .pipe(debug({ title: "TS file with sourcemaps" }));
 
         // run babel twice:
         // 1. first to remove arrow functions and return types
         // 2. second, convert to UI5
         stream = stream.pipe(babel({
-                presets: [
-                    "@babel/preset-typescript",
-                    // "@babel/preset-env",
-                ],
-                plugins: [
-                    ["@babel/plugin-proposal-class-properties", { "loose": true }],
-                    "@babel/plugin-transform-flow-strip-types",
-                    "@babel/plugin-transform-arrow-functions"
-                ],
-            }))
+            presets: [
+                "@babel/preset-typescript",
+                // "@babel/preset-env",
+            ],
+            plugins: [
+                ["@babel/plugin-proposal-class-properties", { "loose": true }],
+                "@babel/plugin-transform-flow-strip-types",
+                "@babel/plugin-transform-arrow-functions"
+            ],
+        }))
             .on('error', function (err) { console.log("Error1: ", err.toString()); })
             .pipe(babel({
                 presets: ["transform-ui5"]
             }))
             .on('error', function (err) { console.log("Error2: ", err.toString()); });
 
-        if ( !bToMinify ) {
+        if (!bToMinify) {
             stream = stream.pipe(sourcemaps.write());
         }
 
@@ -71,26 +61,37 @@ function compileAllTS() {
     };
 }
 
-function createDeclarations() {
+function compileUI5() {
     return function() {
         var stream = gulp.src([
-            `${SRC_PATH}**/*.ts`,
-            `!${SRC_PATH}**/*.d.ts`,
+            `${DIST_PATH}**/*.js`,
+            `!${DIST_PATH}/index.js`,
+            `!${DIST_PATH}**/*-preload.js`,
         ]);
+    
+        stream = stream.pipe(uglify({ mangle: false }))
+            .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); });
+        stream = stream.pipe(ui5preload({
+            base: `${DIST_PATH}`,
+            namespace: NAMESPACE,
+            isLibrary: true
+        }))
+            .pipe(gulp.dest(DIST_PATH));
 
-        var tsProject = ts.createProject("tsconfig.json", {"emitDeclarationOnly": true});
-        // var stream = tsProject.src();
-        stream = stream.pipe(tsProject()).dts;
-        // stream = stream.pipe(debug({ title: "TSC called" }));
+        return stream;
+    }
+}
 
-        // stream = stream.pipe(rename((path) => {
-        //     path.extname = ".d.ts";
-        // }));
-        stream = stream.pipe(gulp.dest('dist'));
+function copyLibraryDef() {
+    return function() {
+        var stream = gulp.src([
+            `${SRC_PATH}library.js`,
+        ])
+            .pipe(gulp.dest(DIST_PATH));
 
         return stream;
     }
 }
 
 // exports.default = gulp.series(compileAllTS(), createDeclarations());
-exports.default = gulp.series(compileAllTS());
+exports.default = gulp.series(compileAllTS(), compileUI5(), copyLibraryDef());
